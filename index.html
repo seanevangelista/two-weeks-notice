@@ -851,7 +851,7 @@ function badgeStyle(days) {
 
 function amazonUrl(person, eventLabel) {
   const q = encodeURIComponent(`${eventLabel} gift ${person.relationship} ${person.interests||''}`.trim())
-  return `https://www.amazon.com/s?k=${q}`
+  return `hhttps://www.amazon.com/s?k=${q}&tag=recalldate-20`
 }
 
 function escapeHtml(s) {
@@ -1006,7 +1006,7 @@ function renderUpcoming() {
         <div class="days-badge" style="${badgeStyle(days)}">${days === 0 ? 'Today!' : days+'d'}</div>
       </div>
       ${person.interests ? `<div class="interests-tag">❤ ${escapeHtml(person.interests)}</div>` : ''}
-      <a class="amazon-btn" href="${amazonUrl(person, ev.label)}" target="_blank">🛍 Find gift on Amazon ($${person.budget_min}–$${person.budget_max})</a>
+      <a class="amazon-btn" href="${amazonUrl(person, ev.label)}" target="_blank">🎁 Find gift on Amazon ($${person.budget_min}–$${person.budget_max})</a>
     </div>`
   }).join('')
 }
