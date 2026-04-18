@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Recalldate</title>
+<title>RecallDate 🎁</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
@@ -167,7 +168,7 @@
 
   .tab {
     flex: 1;
-    padding: 10px;
+    padding: 10px 4px;
     border: none;
     background: none;
     font-size: 13px;
@@ -329,6 +330,55 @@
   .tab-content { display: none; }
   .tab-content.active { display: block; }
 
+  .faq-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+
+  .faq-item summary {
+    padding: 14px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::marker { content: ''; }
+
+  .faq-item summary::after {
+    content: '+';
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--muted);
+    transition: transform 0.15s;
+    margin-left: 12px;
+    flex-shrink: 0;
+  }
+
+  .faq-item[open] summary::after {
+    content: '−';
+  }
+
+  .faq-item[open] summary {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .faq-item p {
+    padding: 12px 16px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 0;
+  }
+
   .loading { text-align: center; color: var(--muted); padding: 2rem; font-size: 14px; }
 
   .window-notice {
@@ -419,7 +469,7 @@
   <div class="header">
     <div class="header-row">
       <div class="header-title">
-        <h1>Recalldate </h1>
+        <h1>RecallDate 🎁</h1>
         <p>Never miss an important moment</p>
       </div>
     </div>
@@ -459,7 +509,7 @@
     <div class="header-row">
       <button class="logout-btn" onclick="logout()">Log out</button>
       <div class="header-title">
-        <h1>Recalldate </h1>
+        <h1>RecallDate 🎁</h1>
         <p>Never miss an important moment</p>
       </div>
       <div style="width:60px;"></div>
@@ -480,6 +530,7 @@
       <button class="tab active" onclick="showTab('upcoming')">Upcoming</button>
       <button class="tab" onclick="showTab('people')">People</button>
       <button class="tab" onclick="showTab('add')">+ Add</button>
+      <button class="tab" onclick="showTab('faq')">FAQ</button>
     </div>
 
     <a href="https://venmo.com/u/Sean-Evangelista" target="_blank" class="tip-banner">
@@ -565,6 +616,61 @@
         <button class="btn" id="saveBtn" onclick="savePerson()">Save person</button>
         <div class="success-msg" id="saveSuccess">✓ Saved! You'll get reminders 14 days before each date.</div>
       </div>
+    </div>
+
+    <!-- FAQ TAB -->
+    <div id="tab-faq" class="tab-content">
+      <div class="section-label">Frequently asked questions</div>
+
+      <details class="faq-item">
+        <summary>How does RecallDate work?</summary>
+        <p>Add the people you care about along with their important dates — birthdays, anniversaries, graduations, anything you want to remember. Two weeks before each date, we'll send you an email with a personalized Amazon gift suggestion based on their interests and your budget.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>When will I get reminders?</summary>
+        <p>Reminders arrive by email exactly 14 days before each date. You'll also see upcoming events in the app up to 60 days ahead on the Upcoming tab.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Why 14 days before?</summary>
+        <p>Two weeks is the sweet spot — long enough to order, ship, and thoughtfully wrap a gift without rushing. It gives you time to find something meaningful rather than settling for whatever's available last minute.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>How do the gift suggestions work?</summary>
+        <p>Each reminder includes a smart Amazon search link built from the person's relationship to you, their interests, and your set budget. Click the orange "Find gift on Amazon" button and Amazon shows relevant options instantly. You still pick the gift — we just help you find it fast.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Is my data private?</summary>
+        <p>Yes. We show no ads, sell no data, and share nothing with third parties. Your account is private to you — your people, dates, notes, and budgets all belong to you alone.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>How much does RecallDate cost?</summary>
+        <p>Nothing. RecallDate is free and ad-free forever. If you find it valuable, the tip banner on the Upcoming tab lets you Venmo us a few bucks to help cover server costs — but there's no obligation.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Can I use this on my phone?</summary>
+        <p>Yes! Open recalldate.com in Safari or Chrome on your phone, then tap Share → Add to Home Screen. It'll install like a native app with its own icon on your home screen.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>How do I edit or delete someone?</summary>
+        <p>Go to the People tab and tap any person's card. You'll see an edit window where you can update their info, add more dates, remove dates, or delete the person entirely.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>What if my reminder email goes to spam?</summary>
+        <p>First-time emails from new senders can occasionally land in spam filters. If that happens, mark it "Not Spam" and future reminders will arrive in your inbox. You can also add reminders@recalldate.com to your contacts to make sure they always come through.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>I found a bug or have a feature idea. How do I reach you?</summary>
+        <p>We'd love to hear from you! Send feedback to the email that sent your reminder (reminders@recalldate.com) and we'll read every message.</p>
+      </details>
     </div>
 
   </div>
@@ -693,7 +799,7 @@ function showTab(name) {
   document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'))
   document.getElementById('tab-'+name).classList.add('active')
   document.querySelectorAll('.tab').forEach((el,i) => {
-    if (['upcoming','people','add'][i] === name) el.classList.add('active')
+    if (['upcoming','people','add','faq'][i] === name) el.classList.add('active')
   })
 }
 
