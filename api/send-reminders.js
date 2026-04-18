@@ -59,7 +59,7 @@ export default async function handler(req, res) {
 
     try {
       await resend.emails.send({
-        from: 'Two Weeks Notice <onboarding@resend.dev>',
+        from: 'Two Weeks Notice <reminders@recalldate.com>',
         to: prefs.email,
         subject: `🎁 ${person.name}'s ${event.label} is in 14 days`,
         html: `
