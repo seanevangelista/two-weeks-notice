@@ -1056,7 +1056,20 @@ function validateBudget(minEl, maxEl) {
   if (max < min) max = min
   return { min, max }
 }
-
+async function insertWithRetry(table, data, maxRetries = 2) {
+  let lastError
+  for (let i = 0; i <= maxRetries; i++) {
+    try {
+      const result = await db.from(table).insert(data).select().single()
+      if (result.error) throw result.error
+      return { data: result.data, error: null }
+    } catch (err) {
+      lastError = err
+      if (i < maxRetries) await new Promise(r => setTimeout(r, 800))
+    }
+  }
+  return { data: null, error: lastError }
+}
 async function savePerson() {
   const name = document.getElementById('f-name').value.trim()
   if (!name) { alert('Please enter a name'); return }
@@ -1072,7 +1085,7 @@ async function savePerson() {
       document.getElementById('f-bmax')
     )
 
-    const { data: person, error: personError } = await db.from('people').insert({
+    const { data: person, error: personError } = await insertWithRetry('people', {
       user_id: currentUser.id,
       name,
       relationship: document.getElementById('f-rel').value,
@@ -1080,7 +1093,7 @@ async function savePerson() {
       notes: document.getElementById('f-notes').value.trim(),
       budget_min: budget.min,
       budget_max: budget.max
-    }).select().single()
+    })
 
     if (personError) throw personError
     if (!person) throw new Error('Could not create person')
