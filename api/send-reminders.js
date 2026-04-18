@@ -49,7 +49,7 @@ export default async function handler(req, res) {
       const amazonQuery = encodeURIComponent(
         `${event.label} gift ${person.relationship || ''} ${person.interests || ''}`.trim()
       )
-      const amazonUrl = `https://www.amazon.com/s?k=${amazonQuery}`
+      const amazonUrl = `https://www.amazon.com/s?k=${amazonQuery}&tag=recalldate-20`
       const budget = `$${person.budget_min}-$${person.budget_max}`
       const interestsHtml = person.interests
         ? `<p style="color:#555;font-size:14px;margin:8px 0;">They love: <strong>${person.interests}</strong></p>`
