@@ -71,7 +71,7 @@ export default async function handler(req, res) {
         ? `Don't let the day slip by. A quick text, call, or last-minute gift goes a long way.`
         : `Time to plan the perfect gift. Budget: <strong>${budget}</strong>`
 
-      const buttonText = isToday ? '🛍 Last-minute gift ideas' : '🛍 Find a gift on Amazon'
+      const buttonText = isToday ? '🎁 Last-minute gift ideas' : '🎁 Find a gift on Amazon'
 
       try {
         await resend.emails.send({
