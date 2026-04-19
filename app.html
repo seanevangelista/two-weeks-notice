@@ -460,12 +460,6 @@ function amazonUrl(interests, budget) {
   if (high) price += '&high-price=' + high;
   return 'https://www.amazon.com/s?k=' + encodeURIComponent(q) + '&tag=' + AFFILIATE_TAG + price;
 }
-  const [low, high] = budgetMap[budget] || [null, null];
-  let price = '';
-  if (low)  price += '&low-price='  + low;
-  if (high) price += '&high-price=' + high;
-  return 'https://www.amazon.com/s?k=' + encodeURIComponent(q) + '&tag=' + AFFILIATE_TAG + price;
-}
 
 function renderUpcoming() {
   const people = getPeople();
