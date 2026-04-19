@@ -444,11 +444,21 @@ function badgeLabel(d) { if(d===0)return'Today!'; if(d===1)return'1 day'; return
 function fmtDate(md) { const [m,d]=md.split('-').map(Number); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]+' '+d; }
 
 function amazonUrl(interests, budget) {
-  const budgetMap = {"under $25":"AND-priceRange-0-25","\$25-\$50":"AND-priceRange-25-50","\$50-\$100":"AND-priceRange-50-100","\$100-\$200":"AND-priceRange-100-200","\$200+":"AND-priceRange-200-99999","surprise me":""};
-  const priceFilter = budget && budgetMap[budget] ? `&rh=${budgetMap[budget]}` : "";
-  const tags = (interests||[]).slice(0,3).join(" ").trim();
-  const q = tags ? `${tags} gift ideas` : "gift ideas";
-  return `https://www.amazon.com/s?k=${encodeURIComponent(q)}&tag=${AFFILIATE_TAG}${priceFilter}`;
+  const tags = (interests||[]).filter(Boolean).slice(0,4).join(' ').trim();
+  const q = tags ? tags + ' gift' : 'gift ideas';
+  const budgetMap = {
+    'under $25':   [null, 25],
+    '$25-$50':     [25,   50],
+    '$50-$100':    [50,  100],
+    '$100-$200':   [100, 200],
+    '$200+':       [200, null],
+    'surprise me': [null, null]
+  };
+  const [low, high] = budgetMap[budget] || [null, null];
+  let price = '';
+  if (low)  price += '&low-price='  + low;
+  if (high) price += '&high-price=' + high;
+  return 'https://www.amazon.com/s?k=' + encodeURIComponent(q) + '&tag=' + AFFILIATE_TAG + price;
 }
 
 function renderUpcoming() {
