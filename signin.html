@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -583,7 +582,15 @@ footer a:hover { color: rgba(255,255,255,0.85); }
   </p>
 </footer>
 
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* ── SUPABASE CLIENT ── */
+const _supabase = supabase.createClient(
+  'https://hjvpjvjzpmmgijcmgztu.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqdnBqdmp6cG1tZ2lqY21nenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NTU2MjUsImV4cCI6MjA5MjAzMTYyNX0.nBf-TWBEFxxFlD0HVUvk4iqPLGt4iZ5z7Drmb5hVN4w'
+);
+
 /* ── TAB SWITCHING ── */
 function switchTab(tab) {
   const panels = { signup: 'panelSignup', signin: 'panelSignin' };
@@ -681,9 +688,7 @@ function checkStrength(val) {
   label.style.color = lvl.color;
 }
 
-/* ── SIGN UP HANDLER ──
-   Replace the body of this function with your actual
-   auth logic (Firebase, Supabase, custom API, etc.)     */
+/* ── SIGN UP HANDLER ── */
 async function handleSignup(e) {
   e.preventDefault();
   clearErrors();
@@ -693,7 +698,6 @@ async function handleSignup(e) {
   const password = document.getElementById('signupPassword').value;
   const confirm  = document.getElementById('signupConfirm').value;
 
-  // Client-side validation
   if (!name) {
     document.getElementById('signupName').classList.add('error');
     return showError('signupError', 'Please enter your full name.');
@@ -714,46 +718,30 @@ async function handleSignup(e) {
   setLoading('signupBtn', 'signupBtnText', 'signupSpinner', true);
 
   try {
-    /*
-      =========================================================
-      PLUG YOUR AUTH HERE
-      =========================================================
-      Example with fetch:
+    const { data, error } = await _supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: name } }
+    });
 
-      const res = await fetch('/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Signup failed');
-      window.location.href = '/app';
+    if (error) throw error;
 
-      Example with Firebase:
-      const { createUserWithEmailAndPassword, updateProfile } = await import('firebase/auth');
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(cred.user, { displayName: name });
-      window.location.href = '/app';
-      =========================================================
-    */
-
-    // TEMPORARY: shows success state until you connect your backend
-    showSuccess('signupSuccess', 'Account created! Connecting you to your dashboard...');
-    setTimeout(() => {
-      // Replace '/app' with the URL of your main app dashboard
-      window.location.href = '/app';
-    }, 1500);
+    showSuccess('signupSuccess', 'Account created! Taking you to your dashboard...');
+    setTimeout(() => { window.location.href = '/app'; }, 1500);
 
   } catch (err) {
-    showError('signupError', err.message || 'Something went wrong. Please try again.');
+    const msg = err.message || '';
+    if (msg.toLowerCase().includes('already registered')) {
+      showError('signupError', 'An account with this email already exists. Try signing in instead.');
+    } else {
+      showError('signupError', msg || 'Something went wrong. Please try again.');
+    }
   } finally {
     setLoading('signupBtn', 'signupBtnText', 'signupSpinner', false);
   }
 }
 
-/* ── SIGN IN HANDLER ──
-   Replace the body of this function with your actual
-   auth logic.                                            */
+/* ── SIGN IN HANDLER ── */
 async function handleSignin(e) {
   e.preventDefault();
   clearErrors();
@@ -773,42 +761,15 @@ async function handleSignin(e) {
   setLoading('signinBtn', 'signinBtnText', 'signinSpinner', true);
 
   try {
-    /*
-      =========================================================
-      PLUG YOUR AUTH HERE
-      =========================================================
-      Example with fetch:
+    const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
 
-      const res = await fetch('/api/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Sign in failed');
-      window.location.href = '/app';
+    if (error) throw error;
 
-      Example with Firebase:
-      const { signInWithEmailAndPassword } = await import('firebase/auth');
-      await signInWithEmailAndPassword(auth, email, password);
-      window.location.href = '/app';
-      =========================================================
-    */
-
-    // TEMPORARY: shows success state until you connect your backend
     showSuccess('signinSuccess', 'Signed in! Taking you to your dashboard...');
-    setTimeout(() => {
-      // Replace '/app' with the URL of your main app dashboard
-      window.location.href = '/app';
-    }, 1500);
+    setTimeout(() => { window.location.href = '/app'; }, 1500);
 
   } catch (err) {
-    const msg = err.message || '';
-    if (msg.toLowerCase().includes('password') || msg.toLowerCase().includes('user')) {
-      showError('signinError', 'Email or password is incorrect. Please try again.');
-    } else {
-      showError('signinError', msg || 'Something went wrong. Please try again.');
-    }
+    showError('signinError', 'Email or password is incorrect. Please try again.');
   } finally {
     setLoading('signinBtn', 'signinBtnText', 'signinSpinner', false);
   }
@@ -828,25 +789,12 @@ async function handleForgot(e) {
   setLoading('forgotBtn', 'forgotBtnText', 'forgotSpinner', true);
 
   try {
-    /*
-      =========================================================
-      PLUG YOUR PASSWORD RESET HERE
-      =========================================================
-      Example with fetch:
-      const res = await fetch('/api/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      if (!res.ok) throw new Error('Reset failed');
+    const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://www.recalldate.com/app'
+    });
 
-      Example with Firebase:
-      const { sendPasswordResetEmail } = await import('firebase/auth');
-      await sendPasswordResetEmail(auth, email);
-      =========================================================
-    */
+    if (error) throw error;
 
-    // TEMPORARY: always shows success (so you don't reveal which emails exist)
     showSuccess('forgotSuccess', 'If that email is registered, a reset link is on its way. Check your inbox.');
     document.getElementById('forgotEmail').value = '';
 
