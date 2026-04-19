@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RecallDate 🎁 — Sign In / Sign Up</title>
+<meta name="description" content="Sign in or create your free RecallDate account. Never miss a birthday, anniversary, or important date again.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!--
+  ============================================================
+  RECALLDATE — SIGN IN / SIGN UP PAGE
+  ============================================================
+  SETUP CHECKLIST:
+  1. Connect your form submission logic (backend/auth handler)
+     to the forms below. Each form has id="signupForm" and
+     id="signinForm" for easy targeting.
+  2. Replace YOUR@EMAIL.COM in the footer with your support email.
+  3. The "Back to home" link points to index.html (your splash page).
+  ============================================================
+-->
+
+<style>
+:root {
+  --navy-dark:    #042C53;
+  --navy:         #0C447C;
+  --navy-mid:     #185FA5;
+  --navy-light:   #378ADD;
+  --navy-bg:      #E6F1FB;
+  --gold:         #BA7517;
+  --gold-mid:     #EF9F27;
+  --gold-light:   #FAC775;
+  --gold-bg:      #FAEEDA;
+  --cream:        #F5F0E8;
+  --cream-mid:    #EDE8DF;
+  --cream-dark:   #D8D1C5;
+  --white:        #FFFFFF;
+  --ink:          #1a1410;
+  --ink-mid:      #3d3530;
+  --ink-light:    #5a4f44;
+  --ink-faint:    #8a7f74;
+  --orange:       #FF9900;
+  --green:        #3B6D11;
+  --green-bg:     #EAF3DE;
+  --red:          #c0392b;
+  --red-bg:       #fdf0ef;
+  --shadow-sm:    0 2px 8px rgba(4,44,83,0.10);
+  --shadow-md:    0 6px 24px rgba(4,44,83,0.13);
+  --shadow-lg:    0 16px 48px rgba(4,44,83,0.18);
+  --radius-sm:    8px;
+  --radius-md:    14px;
+  --radius-lg:    22px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: linear-gradient(160deg, var(--navy-dark) 0%, var(--navy) 55%, #1a5a96 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    radial-gradient(circle at 80% 20%, rgba(186,117,23,0.10) 0%, transparent 50%),
+    radial-gradient(circle at 10% 80%, rgba(56,138,221,0.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem; font-weight: 700;
+  color: #fff; text-decoration: none;
+}
+.nav-back {
+  font-size: 0.88rem; font-weight: 500;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  display: flex; align-items: center; gap: 6px;
+  transition: color 0.2s;
+}
+.nav-back:hover { color: #fff; }
+
+/* ── MAIN LAYOUT ── */
+main {
+  position: relative; z-index: 1;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px 60px;
+}
+
+/* ── CARD ── */
+.auth-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 460px;
+  overflow: hidden;
+}
+
+.card-header {
+  background: var(--navy-dark);
+  padding: 32px 36px 28px;
+  text-align: center;
+  border-bottom: 3px solid var(--gold);
+}
+.card-header-icon { font-size: 2rem; margin-bottom: 10px; }
+.card-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; font-weight: 900;
+  color: #fff; margin-bottom: 6px; line-height: 1.2;
+}
+.card-header p {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.5;
+}
+
+/* ── TABS ── */
+.tab-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--cream-dark);
+}
+.tab-btn {
+  background: none; border: none; cursor: pointer;
+  padding: 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem; font-weight: 600;
+  color: var(--ink-faint);
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  margin-bottom: -1px;
+}
+.tab-btn.active {
+  color: var(--navy);
+  border-bottom-color: var(--gold);
+}
+.tab-btn:hover:not(.active) { color: var(--ink-mid); background: var(--cream); }
+
+/* ── FORMS ── */
+.form-panel { display: none; padding: 32px 36px 36px; }
+.form-panel.active { display: block; }
+
+.form-group { margin-bottom: 20px; }
+.form-label {
+  display: block;
+  font-size: 0.82rem; font-weight: 600;
+  color: var(--ink-mid);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 7px;
+}
+.form-input {
+  width: 100%;
+  background: var(--cream);
+  border: 1.5px solid var(--cream-dark);
+  border-radius: var(--radius-sm);
+  padding: 13px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem; color: var(--ink);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  outline: none;
+  -webkit-appearance: none;
+}
+.form-input:focus {
+  border-color: var(--navy-mid);
+  background: var(--white);
+  box-shadow: 0 0 0 3px var(--navy-bg);
+}
+.form-input::placeholder { color: var(--ink-faint); }
+.form-input.error {
+  border-color: var(--red);
+  background: var(--red-bg);
+}
+
+.form-hint {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+.form-error {
+  display: none;
+  background: var(--red-bg);
+  border: 1px solid #f5c6c2;
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  font-size: 0.88rem;
+  color: var(--red);
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+.form-error.visible { display: block; }
+
+.form-success {
+  display: none;
+  background: var(--green-bg);
+  border: 1px solid #b8dda0;
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  font-size: 0.88rem;
+  color: var(--green);
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+.form-success.visible { display: block; }
+
+/* Submit button */
+.btn-submit {
+  width: 100%;
+  background: var(--gold);
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem; font-weight: 600;
+  padding: 15px;
+  border: none; border-radius: 100px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(186,117,23,0.38);
+  transition: all 0.2s;
+  margin-top: 6px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-submit:hover { background: var(--gold-mid); transform: translateY(-1px); box-shadow: 0 6px 22px rgba(186,117,23,0.44); }
+.btn-submit:active { transform: translateY(0); }
+.btn-submit:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+/* Divider */
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 22px 0;
+  color: var(--ink-faint); font-size: 0.82rem;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1;
+  border-top: 1px solid var(--cream-dark);
+}
+
+/* Forgot password */
+.forgot-link {
+  display: block; text-align: right;
+  font-size: 0.82rem; font-weight: 500;
+  color: var(--navy-mid); text-decoration: none;
+  margin-top: -12px; margin-bottom: 20px;
+  transition: color 0.2s;
+}
+.forgot-link:hover { color: var(--navy); text-decoration: underline; }
+
+/* Switch tab link */
+.switch-msg {
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--ink-faint);
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid var(--cream-mid);
+}
+.switch-link {
+  color: var(--navy-mid); font-weight: 600;
+  text-decoration: none; cursor: pointer;
+  transition: color 0.2s;
+}
+.switch-link:hover { color: var(--navy); text-decoration: underline; }
+
+/* Plan badge on signup */
+.plan-banner {
+  background: var(--gold-bg);
+  border: 1px solid var(--gold-light);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 24px;
+}
+.plan-banner-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.plan-banner-text { font-size: 0.85rem; color: var(--ink-mid); line-height: 1.55; }
+.plan-banner-text strong { color: var(--ink); font-weight: 600; }
+
+/* Password strength */
+.strength-bar-wrap {
+  height: 4px; background: var(--cream-dark);
+  border-radius: 100px; margin-top: 8px; overflow: hidden;
+  display: none;
+}
+.strength-bar {
+  height: 100%; border-radius: 100px;
+  transition: width 0.3s, background 0.3s;
+  width: 0%;
+}
+.strength-label {
+  font-size: 0.75rem; margin-top: 4px;
+  display: none;
+}
+
+/* ── FOOTER ── */
+footer {
+  position: relative; z-index: 1;
+  text-align: center;
+  padding: 20px 40px 28px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+footer p {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.7;
+}
+footer a {
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+footer a:hover { color: rgba(255,255,255,0.85); }
+
+/* ── LOADING SPINNER ── */
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── FORGOT PASSWORD PANEL ── */
+.forgot-panel {
+  display: none;
+  padding: 32px 36px 36px;
+}
+.forgot-panel.active { display: block; }
+.back-to-signin {
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem; font-weight: 500;
+  color: var(--navy-mid);
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 22px; padding: 0;
+  transition: color 0.2s;
+}
+.back-to-signin:hover { color: var(--navy); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 520px) {
+  html { font-size: 17px; }
+  nav { padding: 16px 20px; }
+  main { padding: 24px 16px 48px; align-items: flex-start; padding-top: 32px; }
+  .auth-card { border-radius: var(--radius-md); }
+  .card-header { padding: 26px 24px 22px; }
+  .card-header h1 { font-size: 1.4rem; }
+  .form-panel,
+  .forgot-panel { padding: 26px 24px 30px; }
+  .form-input { font-size: 1rem; padding: 14px 14px; }
+  .btn-submit { font-size: 1.05rem; padding: 16px; }
+  .tab-btn { font-size: 0.92rem; padding: 14px 8px; }
+  footer { padding: 16px 20px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="index.html" class="nav-logo">RecallDate 🎁</a>
+  <a href="index.html" class="nav-back">← Back to home</a>
+</nav>
+
+<!-- ── MAIN ── -->
+<main>
+  <div class="auth-card">
+
+    <!-- Card header -->
+    <div class="card-header">
+      <div class="card-header-icon">🎁</div>
+      <h1>Never miss a moment</h1>
+      <p>Free for up to 10 people. No credit card needed.</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-row">
+      <button class="tab-btn active" id="tabSignup" onclick="switchTab('signup')">Create account</button>
+      <button class="tab-btn" id="tabSignin" onclick="switchTab('signin')">Sign in</button>
+    </div>
+
+    <!-- ── SIGN UP FORM ── -->
+    <div class="form-panel active" id="panelSignup">
+
+      <div class="plan-banner">
+        <span class="plan-banner-icon">✓</span>
+        <div class="plan-banner-text">
+          <strong>Free Starter plan</strong> - up to 10 people, 14-day email reminders, Amazon gift finder. No card required.
+        </div>
+      </div>
+
+      <div class="form-error" id="signupError"></div>
+      <div class="form-success" id="signupSuccess"></div>
+
+      <form id="signupForm" onsubmit="handleSignup(event)" novalidate>
+
+        <div class="form-group">
+          <label class="form-label" for="signupName">Full name</label>
+          <input
+            class="form-input"
+            type="text"
+            id="signupName"
+            name="name"
+            placeholder="John Smith"
+            autocomplete="name"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="signupEmail">Email address</label>
+          <input
+            class="form-input"
+            type="email"
+            id="signupEmail"
+            name="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="signupPassword">Password</label>
+          <input
+            class="form-input"
+            type="password"
+            id="signupPassword"
+            name="password"
+            placeholder="At least 8 characters"
+            autocomplete="new-password"
+            required
+            oninput="checkStrength(this.value)"
+          >
+          <div class="strength-bar-wrap" id="strengthWrap">
+            <div class="strength-bar" id="strengthBar"></div>
+          </div>
+          <div class="strength-label" id="strengthLabel"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="signupConfirm">Confirm password</label>
+          <input
+            class="form-input"
+            type="password"
+            id="signupConfirm"
+            name="confirm"
+            placeholder="Repeat your password"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+
+        <button type="submit" class="btn-submit" id="signupBtn">
+          <span id="signupBtnText">Create free account</span>
+          <div class="spinner" id="signupSpinner"></div>
+        </button>
+
+      </form>
+
+      <p class="switch-msg">
+        Already have an account?
+        <a class="switch-link" onclick="switchTab('signin')">Sign in here</a>
+      </p>
+
+    </div>
+
+    <!-- ── SIGN IN FORM ── -->
+    <div class="form-panel" id="panelSignin">
+
+      <div class="form-error" id="signinError"></div>
+      <div class="form-success" id="signinSuccess"></div>
+
+      <form id="signinForm" onsubmit="handleSignin(event)" novalidate>
+
+        <div class="form-group">
+          <label class="form-label" for="signinEmail">Email address</label>
+          <input
+            class="form-input"
+            type="email"
+            id="signinEmail"
+            name="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="signinPassword">Password</label>
+          <input
+            class="form-input"
+            type="password"
+            id="signinPassword"
+            name="password"
+            placeholder="Your password"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+
+        <a href="#" class="forgot-link" onclick="showForgot(event)">Forgot password?</a>
+
+        <button type="submit" class="btn-submit" id="signinBtn">
+          <span id="signinBtnText">Sign in to RecallDate</span>
+          <div class="spinner" id="signinSpinner"></div>
+        </button>
+
+      </form>
+
+      <p class="switch-msg">
+        New to RecallDate?
+        <a class="switch-link" onclick="switchTab('signup')">Create a free account</a>
+      </p>
+
+    </div>
+
+    <!-- ── FORGOT PASSWORD PANEL ── -->
+    <div class="forgot-panel" id="panelForgot">
+
+      <button class="back-to-signin" onclick="hideForgot()">← Back to sign in</button>
+
+      <div style="margin-bottom:20px;">
+        <p style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--ink);margin-bottom:8px;">Reset your password</p>
+        <p style="font-size:0.9rem;color:var(--ink-light);line-height:1.6;">Enter your email and we will send you a reset link.</p>
+      </div>
+
+      <div class="form-error" id="forgotError"></div>
+      <div class="form-success" id="forgotSuccess"></div>
+
+      <form id="forgotForm" onsubmit="handleForgot(event)" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="forgotEmail">Email address</label>
+          <input
+            class="form-input"
+            type="email"
+            id="forgotEmail"
+            name="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required
+          >
+        </div>
+        <button type="submit" class="btn-submit" id="forgotBtn">
+          <span id="forgotBtnText">Send reset link</span>
+          <div class="spinner" id="forgotSpinner"></div>
+        </button>
+      </form>
+
+    </div>
+
+  </div>
+</main>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <p>
+    By creating an account you agree to our
+    <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.<br>
+    No ads. No data selling. Ever. &nbsp;|&nbsp;
+    <!-- Replace YOUR@EMAIL.COM with your support email -->
+    Need help? <a href="mailto:YOUR@EMAIL.COM">Contact support</a>
+  </p>
+</footer>
+
+<script>
+/* ── TAB SWITCHING ── */
+function switchTab(tab) {
+  const panels = { signup: 'panelSignup', signin: 'panelSignin' };
+  const tabs    = { signup: 'tabSignup',  signin: 'tabSignin'  };
+
+  document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panelForgot').classList.remove('active');
+
+  document.getElementById(panels[tab]).classList.add('active');
+  document.getElementById(tabs[tab]).classList.add('active');
+  clearErrors();
+}
+
+/* ── FORGOT PASSWORD TOGGLE ── */
+function showForgot(e) {
+  e.preventDefault();
+  document.getElementById('panelSignin').classList.remove('active');
+  document.getElementById('panelForgot').classList.add('active');
+  document.getElementById('tabSignin').classList.remove('active');
+  clearErrors();
+}
+
+function hideForgot() {
+  document.getElementById('panelForgot').classList.remove('active');
+  document.getElementById('panelSignin').classList.add('active');
+  document.getElementById('tabSignin').classList.add('active');
+  clearErrors();
+}
+
+/* ── ERROR / SUCCESS HELPERS ── */
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+function showSuccess(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+function clearErrors() {
+  document.querySelectorAll('.form-error, .form-success').forEach(el => {
+    el.classList.remove('visible');
+    el.textContent = '';
+  });
+  document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error'));
+}
+
+function setLoading(btnId, textId, spinnerId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  document.getElementById(spinnerId).style.display = loading ? 'block' : 'none';
+  document.getElementById(textId).style.display = loading ? 'none' : 'inline';
+}
+
+/* ── VALIDATION HELPERS ── */
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+/* ── PASSWORD STRENGTH ── */
+function checkStrength(val) {
+  const wrap  = document.getElementById('strengthWrap');
+  const bar   = document.getElementById('strengthBar');
+  const label = document.getElementById('strengthLabel');
+
+  if (!val) {
+    wrap.style.display = 'none';
+    label.style.display = 'none';
+    return;
+  }
+
+  wrap.style.display = 'block';
+  label.style.display = 'block';
+
+  let score = 0;
+  if (val.length >= 8)  score++;
+  if (val.length >= 12) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  const levels = [
+    { pct: '20%', color: '#e74c3c', text: 'Too short' },
+    { pct: '40%', color: '#e67e22', text: 'Weak' },
+    { pct: '60%', color: '#f1c40f', text: 'Fair' },
+    { pct: '80%', color: '#2ecc71', text: 'Good' },
+    { pct: '100%', color: '#27ae60', text: 'Strong' },
+  ];
+  const lvl = levels[Math.min(score, 4)];
+  bar.style.width = lvl.pct;
+  bar.style.background = lvl.color;
+  label.textContent = lvl.text;
+  label.style.color = lvl.color;
+}
+
+/* ── SIGN UP HANDLER ──
+   Replace the body of this function with your actual
+   auth logic (Firebase, Supabase, custom API, etc.)     */
+async function handleSignup(e) {
+  e.preventDefault();
+  clearErrors();
+
+  const name     = document.getElementById('signupName').value.trim();
+  const email    = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const confirm  = document.getElementById('signupConfirm').value;
+
+  // Client-side validation
+  if (!name) {
+    document.getElementById('signupName').classList.add('error');
+    return showError('signupError', 'Please enter your full name.');
+  }
+  if (!isValidEmail(email)) {
+    document.getElementById('signupEmail').classList.add('error');
+    return showError('signupError', 'Please enter a valid email address.');
+  }
+  if (password.length < 8) {
+    document.getElementById('signupPassword').classList.add('error');
+    return showError('signupError', 'Password must be at least 8 characters.');
+  }
+  if (password !== confirm) {
+    document.getElementById('signupConfirm').classList.add('error');
+    return showError('signupError', 'Passwords do not match.');
+  }
+
+  setLoading('signupBtn', 'signupBtnText', 'signupSpinner', true);
+
+  try {
+    /*
+      =========================================================
+      PLUG YOUR AUTH HERE
+      =========================================================
+      Example with fetch:
+
+      const res = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Signup failed');
+      window.location.href = '/app';
+
+      Example with Firebase:
+      const { createUserWithEmailAndPassword, updateProfile } = await import('firebase/auth');
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: name });
+      window.location.href = '/app';
+      =========================================================
+    */
+
+    // TEMPORARY: shows success state until you connect your backend
+    showSuccess('signupSuccess', 'Account created! Connecting you to your dashboard...');
+    setTimeout(() => {
+      // Replace '/app' with the URL of your main app dashboard
+      window.location.href = '/app';
+    }, 1500);
+
+  } catch (err) {
+    showError('signupError', err.message || 'Something went wrong. Please try again.');
+  } finally {
+    setLoading('signupBtn', 'signupBtnText', 'signupSpinner', false);
+  }
+}
+
+/* ── SIGN IN HANDLER ──
+   Replace the body of this function with your actual
+   auth logic.                                            */
+async function handleSignin(e) {
+  e.preventDefault();
+  clearErrors();
+
+  const email    = document.getElementById('signinEmail').value.trim();
+  const password = document.getElementById('signinPassword').value;
+
+  if (!isValidEmail(email)) {
+    document.getElementById('signinEmail').classList.add('error');
+    return showError('signinError', 'Please enter a valid email address.');
+  }
+  if (!password) {
+    document.getElementById('signinPassword').classList.add('error');
+    return showError('signinError', 'Please enter your password.');
+  }
+
+  setLoading('signinBtn', 'signinBtnText', 'signinSpinner', true);
+
+  try {
+    /*
+      =========================================================
+      PLUG YOUR AUTH HERE
+      =========================================================
+      Example with fetch:
+
+      const res = await fetch('/api/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Sign in failed');
+      window.location.href = '/app';
+
+      Example with Firebase:
+      const { signInWithEmailAndPassword } = await import('firebase/auth');
+      await signInWithEmailAndPassword(auth, email, password);
+      window.location.href = '/app';
+      =========================================================
+    */
+
+    // TEMPORARY: shows success state until you connect your backend
+    showSuccess('signinSuccess', 'Signed in! Taking you to your dashboard...');
+    setTimeout(() => {
+      // Replace '/app' with the URL of your main app dashboard
+      window.location.href = '/app';
+    }, 1500);
+
+  } catch (err) {
+    const msg = err.message || '';
+    if (msg.toLowerCase().includes('password') || msg.toLowerCase().includes('user')) {
+      showError('signinError', 'Email or password is incorrect. Please try again.');
+    } else {
+      showError('signinError', msg || 'Something went wrong. Please try again.');
+    }
+  } finally {
+    setLoading('signinBtn', 'signinBtnText', 'signinSpinner', false);
+  }
+}
+
+/* ── FORGOT PASSWORD HANDLER ── */
+async function handleForgot(e) {
+  e.preventDefault();
+  clearErrors();
+
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!isValidEmail(email)) {
+    document.getElementById('forgotEmail').classList.add('error');
+    return showError('forgotError', 'Please enter a valid email address.');
+  }
+
+  setLoading('forgotBtn', 'forgotBtnText', 'forgotSpinner', true);
+
+  try {
+    /*
+      =========================================================
+      PLUG YOUR PASSWORD RESET HERE
+      =========================================================
+      Example with fetch:
+      const res = await fetch('/api/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (!res.ok) throw new Error('Reset failed');
+
+      Example with Firebase:
+      const { sendPasswordResetEmail } = await import('firebase/auth');
+      await sendPasswordResetEmail(auth, email);
+      =========================================================
+    */
+
+    // TEMPORARY: always shows success (so you don't reveal which emails exist)
+    showSuccess('forgotSuccess', 'If that email is registered, a reset link is on its way. Check your inbox.');
+    document.getElementById('forgotEmail').value = '';
+
+  } catch (err) {
+    showError('forgotError', 'Something went wrong. Please try again or contact support.');
+  } finally {
+    setLoading('forgotBtn', 'forgotBtnText', 'forgotSpinner', false);
+  }
+}
+
+/* ── URL PARAM: auto-switch to signin tab if ?tab=signin ── */
+const urlTab = new URLSearchParams(window.location.search).get('tab');
+if (urlTab === 'signin') switchTab('signin');
+</script>
+
+</body>
+</html>
