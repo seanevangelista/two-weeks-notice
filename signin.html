@@ -32,7 +32,8 @@
 </div>
 
 <script>
-  const supabase = window.supabase.createClient(
+  const { createClient } = supabase;
+  const client = createClient(
     'https://hjvpjvjzpmmgijcmgztu.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqdnBqdmp6cG1tZ2lqY21nenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NTU2MjUsImV4cCI6MjA5MjAzMTYyNX0.nBf-TWBEFxxFlD0HVUvk4iqPLGt4iZ5z7Drmb5hVN4w'
   );
@@ -47,7 +48,7 @@
   async function signUp() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await client.auth.signUp({ email, password });
     if (error) return showMessage(error.message, 'error');
     showMessage('Account created! Signing you in...', 'success');
     setTimeout(() => window.location.href = 'app.html', 1500);
@@ -56,7 +57,7 @@
   async function signIn() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await client.auth.signInWithPassword({ email, password });
     if (error) return showMessage(error.message, 'error');
     window.location.href = 'app.html';
   }
