@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -386,7 +387,7 @@ const AFFILIATE_TAG = 'recalldate-20';
 const PLAN = 'free';
 const LIMITS = { free: 10, pro: 25, unlimited: Infinity };
 const LIMIT  = LIMITS[PLAN] || 10;
-const STRIPE = { pro: 'STRIPE_LINK_PRO', unlimited: 'STRIPE_LINK_UNLIMITED' };
+const STRIPE = { pro: 'https://buy.stripe.com/aFaaEX51m0mpeOIeXe2VG00', unlimited: 'https://buy.stripe.com/bJe5kD3Xi0mpayseXe2VG01' };
 
 const UPGRADE_CFG = {
   free: {
@@ -443,8 +444,11 @@ function badgeLabel(d) { if(d===0)return'Today!'; if(d===1)return'1 day'; return
 function fmtDate(md) { const [m,d]=md.split('-').map(Number); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]+' '+d; }
 
 function amazonUrl(interests, budget) {
-  const q = (interests||[]).slice(0,3).join(' ').trim() || 'gift ideas';
-  return `https://www.amazon.com/s?k=${encodeURIComponent(q)}&tag=${AFFILIATE_TAG}`;
+  const budgetMap = {"under $25":"AND-priceRange-0-25","\$25-\$50":"AND-priceRange-25-50","\$50-\$100":"AND-priceRange-50-100","\$100-\$200":"AND-priceRange-100-200","\$200+":"AND-priceRange-200-99999","surprise me":""};
+  const priceFilter = budget && budgetMap[budget] ? `&rh=${budgetMap[budget]}` : "";
+  const tags = (interests||[]).slice(0,3).join(" ").trim();
+  const q = tags ? `${tags} gift ideas` : "gift ideas";
+  return `https://www.amazon.com/s?k=${encodeURIComponent(q)}&tag=${AFFILIATE_TAG}${priceFilter}`;
 }
 
 function renderUpcoming() {
