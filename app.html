@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -239,7 +238,6 @@ body {
   <button class="tab-btn" id="tabFaq" onclick="switchTab('faq')"><span class="tab-icon">❓</span> FAQ</button>
 </div>
 
-<!-- UPCOMING -->
 <div class="panel active" id="panelUpcoming">
   <div class="info-banner">
     <span>📧</span>
@@ -248,7 +246,6 @@ body {
   <div id="upcomingList"></div>
 </div>
 
-<!-- PEOPLE -->
 <div class="panel" id="panelPeople">
   <div class="people-header">
     <div class="people-count"><span id="peopleCountLabel">0</span> people added</div>
@@ -257,16 +254,13 @@ body {
   <div id="peopleList"></div>
 </div>
 
-<!-- ADD / EDIT -->
 <div class="panel" id="panelAdd">
   <div class="form-card">
     <div class="form-card-title" id="formTitle">👤 Add someone</div>
-
     <div class="form-group">
       <label class="form-label" for="fieldName">Full name</label>
       <input class="form-input" type="text" id="fieldName" placeholder="e.g. James Miller" autocomplete="off">
     </div>
-
     <div class="form-group">
       <label class="form-label" for="fieldRelationship">Relationship</label>
       <select class="form-select" id="fieldRelationship">
@@ -279,18 +273,14 @@ body {
         <option value="Other">Other</option>
       </select>
     </div>
-
     <hr class="form-divider">
-
     <div class="form-group">
       <label class="form-label">Important dates <span class="opt">(add up to 5)</span></label>
       <div class="date-list" id="dateList"></div>
       <button class="btn-add-date" onclick="addDateRow()" id="btnAddDate">+ Add a date</button>
       <div class="form-hint">Birthdays, anniversaries, graduations - anything that matters.</div>
     </div>
-
     <hr class="form-divider">
-
     <div class="form-group">
       <label class="form-label">Interests <span class="opt">(helps find the right gift)</span></label>
       <div class="tags-wrap" id="tagsWrap"></div>
@@ -300,9 +290,7 @@ body {
       </div>
       <div class="form-hint">Type an interest and press Add or hit Enter. Separate multiple with commas.</div>
     </div>
-
     <hr class="form-divider">
-
     <div class="form-group">
       <label class="form-label">Gift budget preference</label>
       <div class="budget-grid">
@@ -314,12 +302,10 @@ body {
         <div class="budget-opt"><input type="radio" name="budget" id="b6" value="surprise me"><label for="b6">Surprise me</label></div>
       </div>
     </div>
-
     <div class="form-group">
       <label class="form-label" for="fieldNotes">Notes <span class="opt">(optional)</span></label>
       <textarea class="form-textarea" id="fieldNotes" placeholder="Anything else worth remembering about this person..."></textarea>
     </div>
-
     <div class="form-actions">
       <button class="btn-secondary" onclick="cancelEdit()">Cancel</button>
       <button class="btn-danger" id="btnDelete" onclick="confirmDelete()">Delete</button>
@@ -328,7 +314,6 @@ body {
   </div>
 </div>
 
-<!-- FAQ -->
 <div class="panel" id="panelFaq">
   <div style="padding-bottom:24px;">
     <div class="faq-item"><button class="faq-trigger" onclick="toggleFaq(this)">How does RecallDate work? <span class="faq-icon">+</span></button><div class="faq-body">You add people along with their important dates and interests. RecallDate sends you an email 14 days before each event so you have time to order a gift from Amazon. A second reminder arrives on the actual date. Every event card includes a one-tap Amazon gift link filtered by that person's interests and your chosen budget.</div></div>
@@ -344,7 +329,6 @@ body {
   </div>
 </div>
 
-<!-- UPGRADE MODAL -->
 <div class="modal-overlay" id="upgradeModal" onclick="handleModalClick(event)">
   <div class="modal-box">
     <button class="modal-close" onclick="hideModal()">✕</button>
@@ -362,7 +346,6 @@ body {
   </div>
 </div>
 
-<!-- DELETE CONFIRM -->
 <div class="delete-overlay" id="deleteOverlay" onclick="handleDeleteClick(event)">
   <div class="delete-box">
     <h3>Remove this person?</h3>
@@ -376,43 +359,38 @@ body {
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const _supabase = supabase.createClient(
+  'https://hjvpjvjzpmmgijcmgztu.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqdnBqdmp6cG1tZ2lqY21nenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NTU2MjUsImV4cCI6MjA5MjAzMTYyNX0.nBf-TWBEFxxFlD0HVUvk4iqPLGt4iZ5z7Drmb5hVN4w'
+);
 const AFFILIATE_TAG = 'recalldate-20';
-
-/*
-  Set PLAN to match the logged-in user's plan.
-  Values: 'free' | 'pro' | 'unlimited'
-  Pull this from your auth/session when you connect a backend.
-*/
 const PLAN = 'free';
 const LIMITS = { free: 10, pro: 25, unlimited: Infinity };
-const LIMIT  = LIMITS[PLAN] || 10;
+const LIMIT = LIMITS[PLAN] || 10;
 const STRIPE = { pro: 'https://buy.stripe.com/aFaaEX51m0mpeOIeXe2VG00', unlimited: 'https://buy.stripe.com/bJe5kD3Xi0mpayseXe2VG01' };
-
 const UPGRADE_CFG = {
-  free: {
-    icon: '🎉', badge: 'Free plan limit reached',
-    title: 'Your circle is full!',
-    sub: "You've added 10 people, the max on the free plan. Upgrade to Pro for up to 25 people - just $1.99/month.",
-    tier: 'Pro Plan', price: '$1.99 <span>/ month</span>',
-    perks: ['Up to 25 people & dates','14-day + day-of reminders','Amazon gift finder','Cancel anytime'],
-    link: STRIPE.pro, cta: 'Upgrade to Pro - $1.99/mo'
-  },
-  pro: {
-    icon: '🌟', badge: 'Pro plan limit reached',
-    title: 'Time to go Unlimited.',
-    sub: "You've added 25 people, the max on the Pro plan. Go Unlimited and add everyone.",
-    tier: 'Unlimited Plan', price: '$4.99 <span>/ month</span>',
-    perks: ['Unlimited people & dates','Everything in Pro','Perfect for large families & pros','Cancel anytime'],
-    link: STRIPE.unlimited, cta: 'Go Unlimited - $4.99/mo'
-  }
+  free: { icon:'🎉', badge:'Free plan limit reached', title:'Your circle is full!', sub:"You've added 10 people, the max on the free plan. Upgrade to Pro for up to 25 people - just $1.99/month.", tier:'Pro Plan', price:'$1.99 <span>/ month</span>', perks:['Up to 25 people & dates','14-day + day-of reminders','Amazon gift finder','Cancel anytime'], link:STRIPE.pro, cta:'Upgrade to Pro - $1.99/mo' },
+  pro: { icon:'🌟', badge:'Pro plan limit reached', title:'Time to go Unlimited.', sub:"You've added 25 people, the max on the Pro plan. Go Unlimited and add everyone.", tier:'Unlimited Plan', price:'$4.99 <span>/ month</span>', perks:['Unlimited people & dates','Everything in Pro','Perfect for large families & pros','Cancel anytime'], link:STRIPE.unlimited, cta:'Go Unlimited - $4.99/mo' }
 };
-
-function getPeople() { try { return JSON.parse(localStorage.getItem('rd_people') || '[]'); } catch { return []; } }
-function savePeople(p) { localStorage.setItem('rd_people', JSON.stringify(p)); }
-function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+let _people = [], _currentUser = null;
+function getPeople() { return _people; }
 function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-
+async function loadPeople() {
+  const { data, error } = await _supabase.from('people').select('*').order('created_at', { ascending: true });
+  if (!error && data) _people = data.map(p => ({ ...p, interests: p.interests||[], dates: p.dates||[] }));
+}
+async function initApp() {
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (!session) { window.location.href = '/signin'; return; }
+  _currentUser = session.user;
+  document.getElementById('navPlanBadge').textContent = { free:'Free', pro:'Pro', unlimited:'Unlimited' }[PLAN] || 'Free';
+  await loadPeople();
+  renderUpcoming();
+  renderPeople();
+}
+initApp();
 let currentTab = 'upcoming';
 function switchTab(tab) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -421,10 +399,9 @@ function switchTab(tab) {
   document.getElementById('tab' + cap(tab)).classList.add('active');
   currentTab = tab;
   if (tab === 'upcoming') renderUpcoming();
-  if (tab === 'people')   renderPeople();
+  if (tab === 'people') renderPeople();
   if (tab === 'add' && !editingId) resetForm();
 }
-
 function getDaysUntil(md) {
   const today = new Date(); today.setHours(0,0,0,0);
   const [m,d] = md.split('-').map(Number);
@@ -432,238 +409,117 @@ function getDaysUntil(md) {
   if (next < today) next.setFullYear(today.getFullYear() + 1);
   return Math.round((next - today) / 86400000);
 }
-
-function avatarColor(name) {
-  const c = ['#0C447C','#185FA5','#3B6D11','#BA7517','#712B13','#534AB7','#0F6E56'];
-  let h = 0; for (let ch of name) h = (h*31 + ch.charCodeAt(0)) % c.length;
-  return c[h];
-}
-function initials(name) { const p = name.trim().split(' '); return (p[0][0]+(p[1]?.[0]||'')).toUpperCase(); }
+function avatarColor(name) { const c=['#0C447C','#185FA5','#3B6D11','#BA7517','#712B13','#534AB7','#0F6E56']; let h=0; for(let ch of name) h=(h*31+ch.charCodeAt(0))%c.length; return c[h]; }
+function initials(name) { const p=name.trim().split(' '); return (p[0][0]+(p[1]?.[0]||'')).toUpperCase(); }
 function badgeClass(d) { if(d===0)return'today'; if(d<=7)return'soon'; if(d<=21)return'medium'; return'far'; }
 function badgeLabel(d) { if(d===0)return'Today!'; if(d===1)return'1 day'; return d+'d'; }
 function fmtDate(md) { const [m,d]=md.split('-').map(Number); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]+' '+d; }
-
 function amazonUrl(interests, budget) {
-  const tags = (interests||[]).filter(Boolean).slice(0,4).join(' ').trim();
-  const q = tags ? tags + ' gift' : 'gift ideas';
-  const budgetMap = {
-    'under $25':   [null, 25],
-    '$25-$50':     [25,   50],
-    '$50-$100':    [50,  100],
-    '$100-$200':   [100, 200],
-    '$200+':       [200, null],
-    'surprise me': [null, null]
-  };
-  const [low, high] = budgetMap[budget] || [null, null];
-  let price = '';
-  if (low)  price += '&low-price='  + low;
-  if (high) price += '&high-price=' + high;
-  return 'https://www.amazon.com/s?k=' + encodeURIComponent(q) + '&tag=' + AFFILIATE_TAG + price;
+  const tags=(interests||[]).filter(Boolean).slice(0,4).join(' ').trim();
+  const q=tags?tags+' gift':'gift ideas';
+  const budgetMap={'under $25':[null,25],'$25-$50':[25,50],'$50-$100':[50,100],'$100-$200':[100,200],'$200+':[200,null],'surprise me':[null,null]};
+  const [low,high]=budgetMap[budget]||[null,null];
+  let price=''; if(low) price+='&low-price='+low; if(high) price+='&high-price='+high;
+  return 'https://www.amazon.com/s?k='+encodeURIComponent(q)+'&tag='+AFFILIATE_TAG+price;
 }
-
 function renderUpcoming() {
-  const people = getPeople();
-  const events = [];
-  people.forEach(p => {
-    (p.dates||[]).forEach(d => {
-      if (!d.date) return;
-      const days = getDaysUntil(d.date);
-      if (days <= 60) events.push({ person: p, dateType: d.type||'Important date', date: d.date, days });
-    });
+  const people=getPeople(), events=[];
+  people.forEach(p => { (p.dates||[]).forEach(d => { if(!d.date)return; const days=getDaysUntil(d.date); if(days<=60) events.push({person:p,dateType:d.type||'Important date',date:d.date,days}); }); });
+  events.sort((a,b)=>a.days-b.days);
+  const el=document.getElementById('upcomingList');
+  if(events.length===0){ el.innerHTML=people.length===0?`<div class="empty-state"><div class="empty-icon">👤</div><h3>No one added yet</h3><p>Add the people in your life to start getting reminders and gift ideas.</p><button class="btn-primary" style="display:inline-block;padding:12px 28px;border-radius:100px;font-size:0.92rem;" onclick="switchTab('add')">Add your first person</button></div>`:`<div class="empty-state"><div class="empty-icon">📅</div><h3>Nothing in the next 60 days</h3><p>No upcoming events right now. Check back soon or add more dates.</p></div>`; return; }
+  let html='', labels={today:false,soon:false,later:false};
+  events.forEach(ev=>{
+    if(ev.days===0&&!labels.today){html+=`<div class="section-lbl">Today</div>`;labels.today=true;}
+    else if(ev.days>0&&ev.days<=14&&!labels.soon){html+=`<div class="section-lbl">Coming up</div>`;labels.soon=true;}
+    else if(ev.days>14&&!labels.later){html+=`<div class="section-lbl">Next 60 days</div>`;labels.later=true;}
+    const interests=(ev.person.interests||[]).slice(0,5).join(', ');
+    const bLabel=ev.person.budget&&ev.person.budget!=='surprise me'?' ('+ev.person.budget+')':'';
+    html+=`<div class="event-card"><div class="event-card-top"><div class="avatar" style="background:${avatarColor(ev.person.name)}">${initials(ev.person.name)}</div><div class="event-card-meta"><div class="event-card-name">${ev.person.name} - ${ev.dateType}</div><div class="event-card-detail">${fmtDate(ev.date)} · ${ev.person.relationship||'Contact'}</div>${interests?`<div class="event-card-interests">❤️ ${interests}</div>`:''}</div><div class="days-badge ${badgeClass(ev.days)}">${badgeLabel(ev.days)}</div></div><a href="${amazonUrl(ev.person.interests,ev.person.budget)}" target="_blank" rel="noopener" class="amazon-btn">🎁 Find gift on Amazon${bLabel}</a></div>`;
   });
-  events.sort((a,b) => a.days - b.days);
-
-  const el = document.getElementById('upcomingList');
-  if (events.length === 0) {
-    el.innerHTML = people.length === 0
-      ? `<div class="empty-state"><div class="empty-icon">👤</div><h3>No one added yet</h3><p>Add the people in your life to start getting reminders and gift ideas.</p><button class="btn-primary" style="display:inline-block;padding:12px 28px;border-radius:100px;font-size:0.92rem;" onclick="switchTab('add')">Add your first person</button></div>`
-      : `<div class="empty-state"><div class="empty-icon">📅</div><h3>Nothing in the next 60 days</h3><p>No upcoming events right now. Check back soon or add more dates.</p></div>`;
-    return;
-  }
-
-  let html = ''; let labels = { today: false, soon: false, later: false };
-  events.forEach(ev => {
-    if (ev.days === 0 && !labels.today) { html += `<div class="section-lbl">Today</div>`; labels.today = true; }
-    else if (ev.days > 0 && ev.days <= 14 && !labels.soon) { html += `<div class="section-lbl">Coming up</div>`; labels.soon = true; }
-    else if (ev.days > 14 && !labels.later) { html += `<div class="section-lbl">Next 60 days</div>`; labels.later = true; }
-    const interests = (ev.person.interests||[]).slice(0,5).join(', ');
-    const bLabel = ev.person.budget && ev.person.budget !== 'surprise me' ? ' ('+ev.person.budget+')' : '';
-    html += `<div class="event-card">
-      <div class="event-card-top">
-        <div class="avatar" style="background:${avatarColor(ev.person.name)}">${initials(ev.person.name)}</div>
-        <div class="event-card-meta">
-          <div class="event-card-name">${ev.person.name} - ${ev.dateType}</div>
-          <div class="event-card-detail">${fmtDate(ev.date)} · ${ev.person.relationship||'Contact'}</div>
-          ${interests ? `<div class="event-card-interests">❤️ ${interests}</div>` : ''}
-        </div>
-        <div class="days-badge ${badgeClass(ev.days)}">${badgeLabel(ev.days)}</div>
-      </div>
-      <a href="${amazonUrl(ev.person.interests, ev.person.budget)}" target="_blank" rel="noopener" class="amazon-btn">🎁 Find gift on Amazon${bLabel}</a>
-    </div>`;
-  });
-  el.innerHTML = html;
+  el.innerHTML=html;
 }
-
 function renderPeople() {
-  const people = getPeople();
-  document.getElementById('peopleCountLabel').textContent = people.length;
-  const pct = LIMIT === Infinity ? 0 : Math.min((people.length/LIMIT)*100, 100);
-  const fillClass = pct >= 100 ? 'full' : pct >= 70 ? 'warn' : '';
-  const planName = { free:'Free', pro:'Pro', unlimited:'Unlimited' }[PLAN] || 'Free';
-  document.getElementById('planBar').innerHTML = `<div class="plan-bar">
-    <div class="plan-bar-text">
-      <strong>${people.length} of ${LIMIT===Infinity?'unlimited':LIMIT}</strong> people on your ${planName} plan
-      ${LIMIT!==Infinity ? `<div class="plan-progress-track"><div class="plan-progress-fill ${fillClass}" style="width:${pct}%"></div></div>` : ''}
-    </div>
-    ${PLAN !== 'unlimited' ? `<a href="${PLAN==='free'?STRIPE.pro:STRIPE.unlimited}" class="btn-upgrade-sm">Upgrade</a>` : ''}
-  </div>`;
-
-  const el = document.getElementById('peopleList');
-  if (people.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><h3>No one here yet</h3><p>Add family, friends, colleagues, and clients to start getting reminders.</p><button class="btn-primary" style="display:inline-block;padding:12px 28px;border-radius:100px;font-size:0.92rem;" onclick="switchTab('add')">Add your first person</button></div>`;
-    return;
-  }
-  const sorted = [...people].sort((a,b) => a.name.localeCompare(b.name));
-  el.innerHTML = sorted.map(p => {
-    const dc = (p.dates||[]).filter(d=>d.date).length;
-    return `<div class="person-card" onclick="editPerson('${p.id}')">
-      <div class="avatar" style="background:${avatarColor(p.name)};width:40px;height:40px;font-size:0.7rem">${initials(p.name)}</div>
-      <div class="person-card-info">
-        <div class="person-card-name">${p.name}</div>
-        <div class="person-card-sub">${p.relationship||'Contact'} · ${dc} date${dc!==1?'s':''}</div>
-      </div>
-      <div class="person-card-actions">
-        <button class="icon-btn delete" onclick="confirmDeleteId(event,'${p.id}','${p.name.replace(/'/g,"\\'")}')">🗑️</button>
-      </div>
-    </div>`;
-  }).join('');
+  const people=getPeople();
+  document.getElementById('peopleCountLabel').textContent=people.length;
+  const pct=LIMIT===Infinity?0:Math.min((people.length/LIMIT)*100,100);
+  const fillClass=pct>=100?'full':pct>=70?'warn':'';
+  const planName={free:'Free',pro:'Pro',unlimited:'Unlimited'}[PLAN]||'Free';
+  document.getElementById('planBar').innerHTML=`<div class="plan-bar"><div class="plan-bar-text"><strong>${people.length} of ${LIMIT===Infinity?'unlimited':LIMIT}</strong> people on your ${planName} plan${LIMIT!==Infinity?`<div class="plan-progress-track"><div class="plan-progress-fill ${fillClass}" style="width:${pct}%"></div></div>`:''}</div>${PLAN!=='unlimited'?`<a href="${PLAN==='free'?STRIPE.pro:STRIPE.unlimited}" class="btn-upgrade-sm">Upgrade</a>`:''}</div>`;
+  const el=document.getElementById('peopleList');
+  if(people.length===0){el.innerHTML=`<div class="empty-state"><div class="empty-icon">👥</div><h3>No one here yet</h3><p>Add family, friends, colleagues, and clients to start getting reminders.</p><button class="btn-primary" style="display:inline-block;padding:12px 28px;border-radius:100px;font-size:0.92rem;" onclick="switchTab('add')">Add your first person</button></div>`;return;}
+  const sorted=[...people].sort((a,b)=>a.name.localeCompare(b.name));
+  el.innerHTML=sorted.map(p=>{const dc=(p.dates||[]).filter(d=>d.date).length;return`<div class="person-card" onclick="editPerson('${p.id}')"><div class="avatar" style="background:${avatarColor(p.name)};width:40px;height:40px;font-size:0.7rem">${initials(p.name)}</div><div class="person-card-info"><div class="person-card-name">${p.name}</div><div class="person-card-sub">${p.relationship||'Contact'} · ${dc} date${dc!==1?'s':''}</div></div><div class="person-card-actions"><button class="icon-btn delete" onclick="confirmDeleteId(event,'${p.id}','${p.name.replace(/'/g,"\\'")}')">🗑️</button></div></div>`;}).join('');
 }
-
-let editingId = null, currentTags = [], currentDates = [], pendingDeleteId = null;
-
-const DATE_TYPES = ['Birthday','Anniversary','Graduation','Work anniversary','Holiday','Other'];
-
-function resetForm() {
-  editingId = null; currentTags = []; currentDates = [];
-  document.getElementById('formTitle').textContent = '👤 Add someone';
-  document.getElementById('fieldName').value = '';
-  document.getElementById('fieldRelationship').value = '';
-  document.getElementById('fieldNotes').value = '';
-  document.getElementById('btnDelete').style.display = 'none';
-  document.querySelector('input[name="budget"][value="$25-$50"]').checked = true;
-  renderTags(); renderDates();
-}
-
+let editingId=null, currentTags=[], currentDates=[], pendingDeleteId=null;
+const DATE_TYPES=['Birthday','Anniversary','Graduation','Work anniversary','Holiday','Other'];
+function resetForm() { editingId=null;currentTags=[];currentDates=[];document.getElementById('formTitle').textContent='👤 Add someone';document.getElementById('fieldName').value='';document.getElementById('fieldRelationship').value='';document.getElementById('fieldNotes').value='';document.getElementById('btnDelete').style.display='none';document.querySelector('input[name="budget"][value="$25-$50"]').checked=true;renderTags();renderDates(); }
 function cancelEdit() { resetForm(); switchTab('people'); }
-
 function editPerson(id) {
-  const p = getPeople().find(x => x.id === id);
-  if (!p) return;
-  editingId = id;
-  currentTags = [...(p.interests||[])];
-  currentDates = JSON.parse(JSON.stringify(p.dates||[]));
-  if (currentDates.length === 0) currentDates.push({ type:'', date:'' });
-  document.getElementById('formTitle').textContent = '✏️ Edit ' + p.name;
-  document.getElementById('fieldName').value = p.name||'';
-  document.getElementById('fieldRelationship').value = p.relationship||'';
-  document.getElementById('fieldNotes').value = p.notes||'';
-  document.getElementById('btnDelete').style.display = 'block';
-  const r = document.querySelector(`input[name="budget"][value="${p.budget||'$25-$50'}"]`);
-  if (r) r.checked = true;
-  renderTags(); renderDates();
-  switchTab('add');
-  setTimeout(() => document.getElementById('formTitle').scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+  const p=getPeople().find(x=>x.id===id); if(!p)return;
+  editingId=id; currentTags=[...(p.interests||[])]; currentDates=JSON.parse(JSON.stringify(p.dates||[]));
+  if(currentDates.length===0) currentDates.push({type:'',date:''});
+  document.getElementById('formTitle').textContent='✏️ Edit '+p.name;
+  document.getElementById('fieldName').value=p.name||'';
+  document.getElementById('fieldRelationship').value=p.relationship||'';
+  document.getElementById('fieldNotes').value=p.notes||'';
+  document.getElementById('btnDelete').style.display='block';
+  const r=document.querySelector(`input[name="budget"][value="${p.budget||'$25-$50'}"]`); if(r)r.checked=true;
+  renderTags();renderDates();switchTab('add');
+  setTimeout(()=>document.getElementById('formTitle').scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
-
-function savePerson() {
-  const name = document.getElementById('fieldName').value.trim();
-  if (!name) { showToast('Please enter a name.','error'); return; }
-  const people = getPeople();
-  const obj = {
-    name,
-    relationship: document.getElementById('fieldRelationship').value,
-    notes: document.getElementById('fieldNotes').value.trim(),
-    budget: document.querySelector('input[name="budget"]:checked')?.value || '$25-$50',
-    interests: [...currentTags],
-    dates: currentDates.filter(d => d.date || d.type)
-  };
-  if (!editingId) {
-    if (people.length >= LIMIT) { showUpgradeModal(PLAN === 'pro' ? 'pro' : 'free'); return; }
-    people.push({ id: genId(), ...obj });
-    savePeople(people);
-    showToast(name + ' added!', 'success');
+async function savePerson() {
+  const name=document.getElementById('fieldName').value.trim();
+  if(!name){showToast('Please enter a name.','error');return;}
+  const obj={name,relationship:document.getElementById('fieldRelationship').value,notes:document.getElementById('fieldNotes').value.trim(),budget:document.querySelector('input[name="budget"]:checked')?.value||'$25-$50',interests:[...currentTags],dates:currentDates.filter(d=>d.date||d.type)};
+  if(!editingId){
+    if(_people.length>=LIMIT){showUpgradeModal(PLAN==='pro'?'pro':'free');return;}
+    const{data,error}=await _supabase.from('people').insert({...obj,user_id:_currentUser.id}).select().single();
+    if(error){showToast('Error saving. Please try again.','error');return;}
+    _people.push({...data,interests:data.interests||[],dates:data.dates||[]});
+    showToast(name+' added!','success');
   } else {
-    const idx = people.findIndex(x => x.id === editingId);
-    if (idx > -1) { people[idx] = { ...people[idx], ...obj }; savePeople(people); showToast(name + ' updated!', 'success'); }
+    const{data,error}=await _supabase.from('people').update(obj).eq('id',editingId).select().single();
+    if(error){showToast('Error updating. Please try again.','error');return;}
+    const idx=_people.findIndex(x=>x.id===editingId);
+    if(idx>-1)_people[idx]={..._people[idx],...data,interests:data.interests||[],dates:data.dates||[]};
+    showToast(name+' updated!','success');
   }
-  resetForm(); switchTab('people');
+  resetForm();switchTab('people');
 }
-
 function renderDates() {
-  const el = document.getElementById('dateList');
-  el.innerHTML = currentDates.map((d,i) => `
-    <div class="date-row">
-      <select class="form-select" onchange="updateDate(${i},'type',this.value)">
-        <option value="">Event type...</option>
-        ${DATE_TYPES.map(t=>`<option value="${t}" ${d.type===t?'selected':''}>${t}</option>`).join('')}
-      </select>
-      <input class="form-input" type="text" placeholder="MM-DD e.g. 06-15" maxlength="5"
-        value="${d.date}" onchange="updateDate(${i},'date',this.value)" oninput="autoFmtDate(this,${i})">
-      <button class="icon-btn delete" onclick="removeDate(${i})">✕</button>
-    </div>`).join('');
-  document.getElementById('btnAddDate').style.display = currentDates.length >= 5 ? 'none' : 'flex';
+  const el=document.getElementById('dateList');
+  el.innerHTML=currentDates.map((d,i)=>`<div class="date-row"><select class="form-select" onchange="updateDate(${i},'type',this.value)"><option value="">Event type...</option>${DATE_TYPES.map(t=>`<option value="${t}" ${d.type===t?'selected':''}>${t}</option>`).join('')}</select><input class="form-input" type="text" placeholder="MM-DD e.g. 06-15" maxlength="5" value="${d.date}" onchange="updateDate(${i},'date',this.value)" oninput="autoFmtDate(this,${i})"><button class="icon-btn delete" onclick="removeDate(${i})">✕</button></div>`).join('');
+  document.getElementById('btnAddDate').style.display=currentDates.length>=5?'none':'flex';
 }
-
-function addDateRow() { if (currentDates.length >= 5) return; currentDates.push({type:'',date:''}); renderDates(); }
-function removeDate(i) { currentDates.splice(i,1); renderDates(); }
-function updateDate(i,k,v) { currentDates[i][k]=v; }
-function autoFmtDate(input,i) { let v=input.value.replace(/[^0-9]/g,''); if(v.length>=3)v=v.slice(0,2)+'-'+v.slice(2,4); input.value=v; currentDates[i].date=v; }
-
-function renderTags() {
-  document.getElementById('tagsWrap').innerHTML = currentTags.map((t,i)=>
-    `<span class="tag">${t}<button class="tag-remove" onclick="removeTag(${i})">✕</button></span>`).join('');
+function addDateRow(){if(currentDates.length>=5)return;currentDates.push({type:'',date:''});renderDates();}
+function removeDate(i){currentDates.splice(i,1);renderDates();}
+function updateDate(i,k,v){currentDates[i][k]=v;}
+function autoFmtDate(input,i){let v=input.value.replace(/[^0-9]/g,'');if(v.length>=3)v=v.slice(0,2)+'-'+v.slice(2,4);input.value=v;currentDates[i].date=v;}
+function renderTags(){document.getElementById('tagsWrap').innerHTML=currentTags.map((t,i)=>`<span class="tag">${t}<button class="tag-remove" onclick="removeTag(${i})">✕</button></span>`).join('');}
+function addTag(){const input=document.getElementById('tagInput');const val=input.value.trim();if(!val)return;const tags=val.split(',').map(t=>t.trim()).filter(t=>t&&!currentTags.includes(t));currentTags.push(...tags);input.value='';renderTags();}
+function removeTag(i){currentTags.splice(i,1);renderTags();}
+function tagKeydown(e){if(e.key==='Enter'){e.preventDefault();addTag();}}
+function confirmDelete(){if(!editingId)return;const p=getPeople().find(x=>x.id===editingId);if(p)confirmDeleteId(null,p.id,p.name);}
+function confirmDeleteId(e,id,name){if(e)e.stopPropagation();pendingDeleteId=id;document.getElementById('deleteMsg').textContent=`This will permanently remove ${name} and all their dates from RecallDate.`;document.getElementById('deleteOverlay').classList.add('active');}
+function hideDelete(){document.getElementById('deleteOverlay').classList.remove('active');pendingDeleteId=null;}
+async function executeDelete(){
+  if(!pendingDeleteId)return;
+  const{error}=await _supabase.from('people').delete().eq('id',pendingDeleteId);
+  if(error){showToast('Error deleting. Please try again.','error');return;}
+  _people=_people.filter(x=>x.id!==pendingDeleteId);
+  hideDelete();showToast('Person removed.','success');resetForm();renderPeople();
+  if(currentTab==='add')switchTab('people');
 }
-function addTag() { const input=document.getElementById('tagInput'); const val=input.value.trim(); if(!val)return; const tags=val.split(',').map(t=>t.trim()).filter(t=>t&&!currentTags.includes(t)); currentTags.push(...tags); input.value=''; renderTags(); }
-function removeTag(i) { currentTags.splice(i,1); renderTags(); }
-function tagKeydown(e) { if(e.key==='Enter'){e.preventDefault();addTag();} }
-
-function confirmDelete() { if(!editingId)return; const p=getPeople().find(x=>x.id===editingId); if(p)confirmDeleteId(null,p.id,p.name); }
-function confirmDeleteId(e,id,name) { if(e)e.stopPropagation(); pendingDeleteId=id; document.getElementById('deleteMsg').textContent=`This will permanently remove ${name} and all their dates from RecallDate.`; document.getElementById('deleteOverlay').classList.add('active'); }
-function hideDelete() { document.getElementById('deleteOverlay').classList.remove('active'); pendingDeleteId=null; }
-function executeDelete() { if(!pendingDeleteId)return; savePeople(getPeople().filter(x=>x.id!==pendingDeleteId)); hideDelete(); showToast('Person removed.','success'); resetForm(); renderPeople(); if(currentTab==='add')switchTab('people'); }
-function handleDeleteClick(e) { if(e.target===document.getElementById('deleteOverlay'))hideDelete(); }
-
-function showUpgradeModal(plan) {
-  const cfg = UPGRADE_CFG[plan]||UPGRADE_CFG.free;
-  document.getElementById('modalIcon').textContent=cfg.icon;
-  document.getElementById('modalBadge').textContent=cfg.badge;
-  document.getElementById('modalTitle').textContent=cfg.title;
-  document.getElementById('modalSub').textContent=cfg.sub;
-  document.getElementById('modalTier').textContent=cfg.tier;
-  document.getElementById('modalPrice').innerHTML=cfg.price;
-  document.getElementById('modalPerks').innerHTML=cfg.perks.map(p=>`<li>${p}</li>`).join('');
-  document.getElementById('modalUpgradeBtn').textContent=cfg.cta;
-  document.getElementById('modalUpgradeBtn').href=cfg.link;
-  document.getElementById('upgradeModal').classList.add('active');
-  document.body.style.overflow='hidden';
-}
-function hideModal() { document.getElementById('upgradeModal').classList.remove('active'); document.body.style.overflow=''; }
-function handleModalClick(e) { if(e.target===document.getElementById('upgradeModal'))hideModal(); }
-
-function toggleFaq(btn) { const item=btn.closest('.faq-item'); const open=item.classList.contains('open'); document.querySelectorAll('.faq-item.open').forEach(el=>el.classList.remove('open')); if(!open)item.classList.add('open'); }
-
+function handleDeleteClick(e){if(e.target===document.getElementById('deleteOverlay'))hideDelete();}
+function showUpgradeModal(plan){const cfg=UPGRADE_CFG[plan]||UPGRADE_CFG.free;document.getElementById('modalIcon').textContent=cfg.icon;document.getElementById('modalBadge').textContent=cfg.badge;document.getElementById('modalTitle').textContent=cfg.title;document.getElementById('modalSub').textContent=cfg.sub;document.getElementById('modalTier').textContent=cfg.tier;document.getElementById('modalPrice').innerHTML=cfg.price;document.getElementById('modalPerks').innerHTML=cfg.perks.map(p=>`<li>${p}</li>`).join('');document.getElementById('modalUpgradeBtn').textContent=cfg.cta;document.getElementById('modalUpgradeBtn').href=cfg.link;document.getElementById('upgradeModal').classList.add('active');document.body.style.overflow='hidden';}
+function hideModal(){document.getElementById('upgradeModal').classList.remove('active');document.body.style.overflow='';}
+function handleModalClick(e){if(e.target===document.getElementById('upgradeModal'))hideModal();}
+function toggleFaq(btn){const item=btn.closest('.faq-item');const open=item.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(el=>el.classList.remove('open'));if(!open)item.classList.add('open');}
 let toastTimer;
-function showToast(msg,type='') { const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'+(type?' '+type:''); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2800); }
-
-function handleSignout() {
-  // Replace with your actual sign-out logic
-  window.location.href = 'signin.html';
-}
-
-document.getElementById('navPlanBadge').textContent = {free:'Free',pro:'Pro',unlimited:'Unlimited'}[PLAN]||'Free';
-document.addEventListener('keydown', e => { if(e.key==='Escape'){hideModal();hideDelete();} });
-
-renderUpcoming();
+function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type?' '+type:'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2800);}
+async function handleSignout(){await _supabase.auth.signOut();window.location.href='/signin';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){hideModal();hideDelete();}});
 </script>
 </body>
 </html>
