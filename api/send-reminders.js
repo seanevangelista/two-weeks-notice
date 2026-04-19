@@ -8,75 +8,88 @@ const supabase = createClient(
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export default async function handler(req, res) {
+  // Security check — only allow calls with the correct secret
   const authHeader = req.headers.authorization
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
   const today = new Date()
-  const in14Days = new Date()
-  in14Days.setDate(today.getDate() + 14)
+  const in14 = new Date()
+  in14.setDate(today.getDate() + 14)
 
-  const targets = [
-    { month: today.getMonth() + 1, day: today.getDate(), type: 'today' },
-    { month: in14Days.getMonth() + 1, day: in14Days.getDate(), type: 'twoWeeks' }
-  ]
+  // Format as MM-DD to match how dates are stored in the people table
+  const fmt = d => {
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${m}-${day}`
+  }
+  const todayStr = fmt(today)
+  const in14Str  = fmt(in14)
+
+  // Pull every person from the database (service role bypasses RLS)
+  const { data: people, error } = await supabase
+    .from('people')
+    .select('*')
+
+  if (error) {
+    return res.status(500).json({ error: error.message })
+  }
 
   let totalSent = 0
   const errors = []
 
-  for (const t of targets) {
-    const { data: events } = await supabase
-      .from('events')
-      .select('*, people(*)')
-      .eq('month', t.month)
-      .eq('day', t.day)
+  for (const person of people) {
+    const dates = person.dates || []
 
-    if (!events?.length) continue
+    for (const d of dates) {
+      if (!d.date) continue
 
-    for (const event of events) {
-      const person = event.people
-      if (!person) continue
+      const isToday   = d.date === todayStr
+      const is14Away  = d.date === in14Str
+      if (!isToday && !is14Away) continue
 
-      const { data: prefs } = await supabase
-        .from('notification_prefs')
-        .select('email')
-        .eq('user_id', person.user_id)
-        .maybeSingle()
+      // Get the user's email from Supabase auth
+      const { data: userData, error: userError } = await supabase.auth.admin.getUserById(person.user_id)
+      if (userError || !userData?.user?.email) continue
+      const toEmail = userData.user.email
 
-      if (!prefs?.email) continue
-
+      // Build Amazon gift link from interests and budget
+      const interests = (person.interests || []).join(' ')
       const amazonQuery = encodeURIComponent(
-        `${event.label} gift ${person.relationship || ''} ${person.interests || ''}`.trim()
+        `${interests} gift`.trim() || 'gift ideas'
       )
-      const amazonUrl = `https://www.amazon.com/s?k=${amazonQuery}&tag=recalldate-20`
-      const budget = `$${person.budget_min}-$${person.budget_max}`
-      const interestsHtml = person.interests
-        ? `<p style="color:#555;font-size:14px;margin:8px 0;">They love: <strong>${person.interests}</strong></p>`
-        : ''
-      const notesHtml = person.notes
-        ? `<p style="color:#888;font-size:13px;margin:8px 0;">Note: ${person.notes}</p>`
-        : ''
+      const budgetParam = buildBudgetParam(person.budget)
+      const amazonUrl = `https://www.amazon.com/s?k=${amazonQuery}&tag=recalldate-20${budgetParam}`
 
-      const isToday = t.type === 'today'
+      // Build email content
+      const eventLabel = d.type || 'Important date'
       const subject = isToday
-        ? `🎉 It's ${person.name}'s ${event.label} today!`
-        : `🎁 ${person.name}'s ${event.label} is in 14 days`
+        ? `🎉 It's ${person.name}'s ${eventLabel} today!`
+        : `🎁 ${person.name}'s ${eventLabel} is in 14 days`
 
       const heading = isToday
-        ? `Today is ${person.name}'s ${event.label}!`
-        : `${person.name}'s ${event.label} is in 14 days`
+        ? `Today is ${person.name}'s ${eventLabel}!`
+        : `${person.name}'s ${eventLabel} is in 14 days`
 
       const intro = isToday
         ? `Don't let the day slip by. A quick text, call, or last-minute gift goes a long way.`
-        : `Time to plan the perfect gift. Budget: <strong>${budget}</strong>`
+        : `You've got 14 days — enough time to order the perfect gift from Amazon.${person.budget ? ` Budget: <strong>${person.budget}</strong>` : ''}`
+
+      const interestsHtml = interests
+        ? `<p style="color:#555;font-size:14px;margin:8px 0;">They love: <strong>${interests}</strong></p>`
+        : ''
+
+      const notesHtml = person.notes
+        ? `<p style="color:#888;font-size:13px;margin:8px 0;">Note: ${person.notes}</p>`
+        : ''
 
       const buttonText = isToday ? '🎁 Last-minute gift ideas' : '🎁 Find a gift on Amazon'
 
       try {
         await resend.emails.send({
           from: 'RecallDate <reminders@recalldate.com>',
-          to: prefs.email,
+          to: toEmail,
           subject,
           html: `
             <div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;padding:24px;background:#f7f5f0;">
@@ -91,17 +104,30 @@ export default async function handler(req, res) {
                 <a href="${amazonUrl}" style="display:inline-block;margin-top:16px;padding:12px 20px;background:#FF9900;color:#111;font-weight:700;font-size:14px;text-decoration:none;border-radius:8px;">
                   ${buttonText}
                 </a>
-                <p style="font-size:11px;color:#aaa;margin-top:28px;">You're getting this because you signed up for RecallDate reminders at recalldate.com</p>
+                <hr style="border:none;border-top:1px solid #e8e4dc;margin:24px 0 12px;" />
+                <p style="font-size:11px;color:#aaa;margin:0;">You're getting this because you use RecallDate at recalldate.com. To stop receiving reminders, sign in and remove this person's date.</p>
               </div>
             </div>
           `
         })
         totalSent++
       } catch (err) {
-        errors.push({ person: person.name, type: t.type, error: err.message })
+        errors.push({ person: person.name, event: eventLabel, error: err.message })
       }
     }
   }
 
   return res.status(200).json({ sent: totalSent, errors })
+}
+
+function buildBudgetParam(budget) {
+  const map = {
+    'under $25':  '&high-price=25',
+    '$25-$50':    '&low-price=25&high-price=50',
+    '$50-$100':   '&low-price=50&high-price=100',
+    '$100-$200':  '&low-price=100&high-price=200',
+    '$200+':      '&low-price=200',
+    'surprise me': ''
+  }
+  return map[budget] || ''
 }
