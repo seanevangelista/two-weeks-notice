@@ -50,7 +50,7 @@ export default async function handler(req, res) {
         .eq('person_id', person.id)
         .eq('event_date', d.date)
         .eq('reminder_type', reminderType)
-        .eq('sent_on', todayStr)
+        .eq('sent_on', today.toISOString().slice(0, 10))
         .maybeSingle()
 
       if (alreadySent) continue
@@ -114,7 +114,7 @@ export default async function handler(req, res) {
           person_id: person.id,
           event_date: d.date,
           reminder_type: reminderType,
-          sent_on: todayStr
+          sent_on: today.toISOString().slice(0, 10)
         })
 
         totalSent++
