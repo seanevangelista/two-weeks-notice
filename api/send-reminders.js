@@ -8,7 +8,6 @@ const supabase = createClient(
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export default async function handler(req, res) {
-  // Security check — only allow calls with the correct secret
   const authHeader = req.headers.authorization
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: 'Unauthorized' })
@@ -18,7 +17,6 @@ export default async function handler(req, res) {
   const in14 = new Date()
   in14.setDate(today.getDate() + 14)
 
-  // Format as MM-DD to match how dates are stored in the people table
   const fmt = d => {
     const m = String(d.getMonth() + 1).padStart(2, '0')
     const day = String(d.getDate()).padStart(2, '0')
@@ -27,14 +25,8 @@ export default async function handler(req, res) {
   const todayStr = fmt(today)
   const in14Str  = fmt(in14)
 
-  // Pull every person from the database (service role bypasses RLS)
-  const { data: people, error } = await supabase
-    .from('people')
-    .select('*')
-
-  if (error) {
-    return res.status(500).json({ error: error.message })
-  }
+  const { data: people, error } = await supabase.from('people').select('*')
+  if (error) return res.status(500).json({ error: error.message })
 
   let totalSent = 0
   const errors = []
@@ -45,45 +37,51 @@ export default async function handler(req, res) {
     for (const d of dates) {
       if (!d.date) continue
 
-      const isToday   = d.date === todayStr
-      const is14Away  = d.date === in14Str
+      const isToday  = d.date === todayStr
+      const is14Away = d.date === in14Str
       if (!isToday && !is14Away) continue
+
+      const reminderType = isToday ? 'today' : '14days'
+
+      // Skip if already sent today
+      const { data: alreadySent } = await supabase
+        .from('reminders_sent')
+        .select('id')
+        .eq('person_id', person.id)
+        .eq('event_date', d.date)
+        .eq('reminder_type', reminderType)
+        .eq('sent_on', todayStr)
+        .maybeSingle()
+
+      if (alreadySent) continue
 
       // Get the user's email from Supabase auth
       const { data: userData, error: userError } = await supabase.auth.admin.getUserById(person.user_id)
       if (userError || !userData?.user?.email) continue
       const toEmail = userData.user.email
 
-      // Build Amazon gift link from interests and budget
+      // Build Amazon gift link
       const interests = (person.interests || []).join(' ')
-      const amazonQuery = encodeURIComponent(
-        `${interests} gift`.trim() || 'gift ideas'
-      )
+      const amazonQuery = encodeURIComponent(`${interests} gift`.trim() || 'gift ideas')
       const budgetParam = buildBudgetParam(person.budget)
       const amazonUrl = `https://www.amazon.com/s?k=${amazonQuery}&tag=recalldate-20${budgetParam}`
 
-      // Build email content
       const eventLabel = d.type || 'Important date'
       const subject = isToday
         ? `🎉 It's ${person.name}'s ${eventLabel} today!`
         : `🎁 ${person.name}'s ${eventLabel} is in 14 days`
-
       const heading = isToday
         ? `Today is ${person.name}'s ${eventLabel}!`
         : `${person.name}'s ${eventLabel} is in 14 days`
-
       const intro = isToday
         ? `Don't let the day slip by. A quick text, call, or last-minute gift goes a long way.`
         : `You've got 14 days — enough time to order the perfect gift from Amazon.${person.budget ? ` Budget: <strong>${person.budget}</strong>` : ''}`
-
       const interestsHtml = interests
         ? `<p style="color:#555;font-size:14px;margin:8px 0;">They love: <strong>${interests}</strong></p>`
         : ''
-
       const notesHtml = person.notes
         ? `<p style="color:#888;font-size:13px;margin:8px 0;">Note: ${person.notes}</p>`
         : ''
-
       const buttonText = isToday ? '🎁 Last-minute gift ideas' : '🎁 Find a gift on Amazon'
 
       try {
@@ -110,6 +108,15 @@ export default async function handler(req, res) {
             </div>
           `
         })
+
+        // Log the sent reminder to prevent duplicates
+        await supabase.from('reminders_sent').insert({
+          person_id: person.id,
+          event_date: d.date,
+          reminder_type: reminderType,
+          sent_on: todayStr
+        })
+
         totalSent++
       } catch (err) {
         errors.push({ person: person.name, event: eventLabel, error: err.message })
@@ -122,11 +129,11 @@ export default async function handler(req, res) {
 
 function buildBudgetParam(budget) {
   const map = {
-    'under $25':  '&high-price=25',
-    '$25-$50':    '&low-price=25&high-price=50',
-    '$50-$100':   '&low-price=50&high-price=100',
-    '$100-$200':  '&low-price=100&high-price=200',
-    '$200+':      '&low-price=200',
+    'under $25':   '&high-price=25',
+    '$25-$50':     '&low-price=25&high-price=50',
+    '$50-$100':    '&low-price=50&high-price=100',
+    '$100-$200':   '&low-price=100&high-price=200',
+    '$200+':       '&low-price=200',
     'surprise me': ''
   }
   return map[budget] || ''
