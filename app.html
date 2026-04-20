@@ -474,8 +474,10 @@ function editPerson(id) {
   document.getElementById('formTitle').textContent='✏️ Edit '+p.name;
   document.getElementById('fieldName').value=p.name||'';
   document.getElementById('fieldRelationship').value=p.relationship||'';
-  document.getElementById('fieldNotes').value=p.notes||'';
-  document.getElementById('btnDelete').style.display='block';
+document.getElementById('fieldNotes').value = '';
+    document.getElementById('notify14days').checked = true;
+    document.getElementById('notifyToday').checked = true;
+    document.getElementById('btnDelete').style.display = 'none';
   const r=document.querySelector(`input[name="budget"][value="${p.budget||'$25-$50'}"]`); if(r)r.checked=true;
   renderTags();renderDates();switchTab('add');
   setTimeout(()=>document.getElementById('formTitle').scrollIntoView({behavior:'smooth',block:'start'}),100);
