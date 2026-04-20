@@ -453,7 +453,7 @@ function renderPeople() {
 }
 let editingId=null, currentTags=[], currentDates=[], pendingDeleteId=null;
 const DATE_TYPES=['Birthday','Anniversary','Graduation','Work anniversary','Holiday','Other'];
-function resetForm() { editingId=null;currentTags=[];currentDates=[];document.getElementById('formTitle').textContent='👤 Add someone';document.getElementById('fieldName').value='';document.getElementById('fieldRelationship').value='';document.getElementById('fieldNotes').value='';document.getElementById('btnDelete').style.display='none';document.querySelector('input[name="budget"][value="$25-$50"]').checked=true;renderTags();renderDates(); }
+function resetForm() { editingId=null;currentTags=[];currentDates=[];document.getElementById('formTitle').textContent='👤 Add someone';document.getElementById('fieldName').value='';document.getElementById('fieldRelationship').value='';document.getElementById('fieldNotes').value='';document.getElementById('btnDelete').style.display='none';document.querySelector('input[name="budget"][value="$25-$50"]').checked=true;currentTags = []; currentDates = []; renderTags(); renderDates(); }
 function cancelEdit() { resetForm(); switchTab('people'); }
 function editPerson(id) {
   const p=getPeople().find(x=>x.id===id); if(!p)return;
