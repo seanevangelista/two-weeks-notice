@@ -304,7 +304,18 @@ body {
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label" for="fieldNotes">Notes <span class="opt">(optional)</span></label>
+    <label class="form-label">Reminders</label>
+<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
+  <label style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--ink-mid);cursor:pointer;">
+    <input type="checkbox" id="notify14days" checked style="width:18px;height:18px;cursor:pointer;">
+    Send me a reminder 14 days before
+  </label>
+  <label style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--ink-mid);cursor:pointer;">
+    <input type="checkbox" id="notifyToday" checked style="width:18px;height:18px;cursor:pointer;">
+    Send me a reminder on the day itself
+  </label>
+</div>
+<label class="form-label" for="fieldNotes">Notes <span class="opt">(optional)</span></label>
       <textarea class="form-textarea" id="fieldNotes" placeholder="Anything else worth remembering about this person..."></textarea>
     </div>
     <div class="form-actions">
