@@ -813,7 +813,7 @@ async function handleForgot(e) {
 
   try {
     const { error } = await _supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://www.recalldate.com/app'
+      redirectTo: 'https://www.recalldate.com/signin'
     });
 
     if (error) throw error;
