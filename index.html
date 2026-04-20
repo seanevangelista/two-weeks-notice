@@ -1474,7 +1474,11 @@ const _supabase = supabase.createClient(
 if (session) {
   document.querySelectorAll('a[href="signin.html"], a[href="signin.html?tab=signin"], a[href="/signin"]').forEach(a => {
     a.href = '/app';
-    a.textContent = 'Go to dashboard';
+    if (a.classList.contains('btn-nav-ghost')) {
+  a.style.display = 'none';
+} else {
+  a.textContent = 'Go to dashboard →';
+}
   });
 }
 })();
