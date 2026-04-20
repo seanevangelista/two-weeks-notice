@@ -1472,7 +1472,7 @@ const _supabase = supabase.createClient(
 (async () => {
   const { data: { session } } = await _supabase.auth.getSession();
   if (session) {
-    document.querySelectorAll('a[href="signin.html"], a[href="/signin"]').forEach(a => {
+    document.querySelectorAll('a[href="signin.html"], a[href="signin.html?tab=signin"], a[href="/signin"]').forEach(a => {
       a.href = '/app';
     });
   }
