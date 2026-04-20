@@ -483,7 +483,9 @@ function editPerson(id) {
 async function savePerson() {
   const name=document.getElementById('fieldName').value.trim();
   if(!name){showToast('Please enter a name.','error');return;}
-  const obj={name,relationship:document.getElementById('fieldRelationship').value,notes:document.getElementById('fieldNotes').value.trim(),budget:document.querySelector('input[name="budget"]:checked')?.value||'$25-$50',interests:[...currentTags],dates:currentDates.filter(d=>d.date||d.type)};
+  const obj={name,relationship:document.getElementById('fieldRelationship').value,notes: document.getElementById('fieldNotes').value.trim(),
+    notify_14days: document.getElementById('notify14days').checked,
+    notify_today: document.getElementById('notifyToday').checked,budget:document.querySelector('input[name="budget"]:checked')?.value||'$25-$50',interests:[...currentTags],dates:currentDates.filter(d=>d.date||d.type)};
   if(!editingId){
     if(_people.length>=LIMIT){showUpgradeModal(PLAN==='pro'?'pro':'free');return;}
     const{data,error}=await _supabase.from('people').insert({...obj,user_id:_currentUser.id}).select().single();
