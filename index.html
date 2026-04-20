@@ -1462,6 +1462,22 @@ document.querySelectorAll('.price-cta.free').forEach(btn => {
 });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const _supabase = supabase.createClient(
+  'https://hjvpjvjzpmmgijcmgztu.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqdnBqdmp6cG1tZ2lqY21nenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NTU2MjUsImV4cCI6MjA5MjAzMTYyNX0.nBf-TWBEFxxFlD0HVUvk4iqPLGt4iZ5z7Drmb5hVN4w'
+);
+
+(async () => {
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (session) {
+    document.querySelectorAll('a[href="signin.html"], a[href="/signin"]').forEach(a => {
+      a.href = '/app';
+    });
+  }
+})();
+</script>
 </body>
 </html>
 
