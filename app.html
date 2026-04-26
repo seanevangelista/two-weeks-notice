@@ -379,12 +379,14 @@ const _supabase = supabase.createClient(
 );
 const AFFILIATE_TAG = 'recalldate-20';
 const PLAN = 'free';
-const LIMITS = { free: 10, pro: 25, unlimited: Infinity };
+const LIMITS = { free: 25, pro: 75, unlimited: Infinity };
 const LIMIT = LIMITS[PLAN] || 10;
 const STRIPE = { pro: 'https://buy.stripe.com/aFaaEX51m0mpeOIeXe2VG00', unlimited: 'https://buy.stripe.com/bJe5kD3Xi0mpayseXe2VG01' };
 const UPGRADE_CFG = {
-  free: { icon:'🎉', badge:'Free plan limit reached', title:'Your circle is full!', sub:"You've added 10 people, the max on the free plan. Upgrade to Pro for up to 25 people - just $1.99/month.", tier:'Pro Plan', price:'$1.99 <span>/ month</span>', perks:['Up to 25 people & dates','14-day + day-of reminders','Amazon gift finder','Cancel anytime'], link:STRIPE.pro, cta:'Upgrade to Pro - $1.99/mo' },
-  pro: { icon:'🌟', badge:'Pro plan limit reached', title:'Time to go Unlimited.', sub:"You've added 25 people, the max on the Pro plan. Go Unlimited and add everyone.", tier:'Unlimited Plan', price:'$4.99 <span>/ month</span>', perks:['Unlimited people & dates','Everything in Pro','Perfect for large families & pros','Cancel anytime'], link:STRIPE.unlimited, cta:'Go Unlimited - $4.99/mo' }
+  free: { icon:'🎉', badge:'Free plan limit reached', title:'Your circle is full!', sub: "You've added 25 people, the max on the free plan. Upgrade to Pro for up to 75 people - just $1.99/month.",
+    tier: 'Pro Plan', price: '$1.99 <span>/ month</span>',
+    perks: ['Up to 75 people & dates','14-day + day-of reminders','Amazon gift finder','Cancel anytime'], link:STRIPE.pro, cta:'Upgrade to Pro - $1.99/mo' },
+  pro: { icon:'🌟', badge:'Pro plan limit reached', title:'Time to go Unlimited.', sub:"You've added 75 people, the max on the Pro plan. Go Unlimited and add everyone.", tier:'Unlimited Plan', price:'$4.99 <span>/ month</span>', perks:['Unlimited people & dates','Everything in Pro','Perfect for large families & pros','Cancel anytime'], link:STRIPE.unlimited, cta:'Go Unlimited - $4.99/mo' }
 };
 let _people = [], _currentUser = null;
 function getPeople() { return _people; }
